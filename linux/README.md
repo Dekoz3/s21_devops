@@ -11,13 +11,16 @@
     2. [NANO](#nano)
     3. [MCEDIT](#mcedit)
 8. [Установка и базовая настройка сервиса SSHD](#установка-и-базовая-настройка-сервиса-sshd)
+9. [Установка и использование утилит top, htop](#установить-и-запустить-утилиты-top-и-htop)
+10. [Использование утилиты fdisk](#использование-утилиты-fdisk)
+11. [Использование утилиты df](#использование-утилиты-df)
 
 ## Установка ОС
 
 (Сами шаги предоврительной установки и настройки пропущены). <br>
 Чтобы узнать версию установленой ОС требуется ввести в командную строку
 ``` bash
-cat /etc/issue
+$ cat /etc/issue
 ```
 > Версии могут отличаться.
 
@@ -27,9 +30,9 @@ cat /etc/issue
 
 Для того чтобы создать нового пользователя введите следующую команду. 
 ``` bash
-sudo adduser -G adm user-1
-cat /etc/passwd | grep user-1
-sudo passwd user-1
+$ sudo adduser -G adm user-1
+$ cat /etc/passwd | grep user-1
+$ sudo passwd user-1
 ```
 Результат выполения команд. <br>
 ![Новый пользователь](./assets/2.png)
@@ -37,17 +40,17 @@ sudo passwd user-1
 ## Настройка сети ОС
 1. Устанавливаем новое имя машины.
 ``` bash
-hostnamectl set-hostname deltajed-server-1
+$ hostnamectl set-hostname deltajed-server-1
 ```
 ![Новое имя машины](./assets/3.png)
 
 2. Устанавливаем временную зону, соответствующую вашему текущему местоположению.
 
 ``` bash
-sudo timedatectl
-timedatectl list-timezones | grep Tashkent
-sudo timedatectl set-timezone Asia/Tashkent
-sudo timedatectl
+$ sudo timedatectl
+$ timedatectl list-timezones | grep Tashkent
+$ sudo timedatectl set-timezone Asia/Tashkent
+$ sudo timedatectl
 ```
 
 ![Новая таймзона](./assets/4.png)
@@ -55,7 +58,7 @@ sudo timedatectl
 3. Вывести названия сетевых интерфейсов с помощью консольной команды.
 Для этого надо установить набор сетевых инструментов.
 ``` bash
-sudo apt install net-tools
+$ sudo apt install net-tools
 ```
 
 ![Текущие подключения](./assets/5.png)
@@ -64,7 +67,7 @@ sudo apt install net-tools
 
 4. Используя консольную команду получить ip адрес устройства, на котором вы работаете, от DHCP сервера.
 ``` bash 
-hostname -I
+$ hostname -I
 ```
 ![Текущий ip](./assets/6.png)
 
@@ -74,43 +77,43 @@ hostname -I
 
 > Так мы можем определить наш внешний ip-адрес шлюза (ip):
 ``` bash
-wget -O - -q icanhazip.com
-curl ifconfig.me/ip
+$ wget -O - -q icanhazip.com
+$ curl ifconfig.me/ip
 ```
 ![Внешний ip](./assets/7.png)
 
 > Так мы можем определить наш внутренний IP-адрес шлюза:
 
 ``` bash 
-ip route
+$ ip route
 ```
 ![Внутренний ip](./assets/8.png)
 
 6. Задать статичные (заданные вручную, а не полученные от DHCP сервера) настройки ip, gw, dns (использовать публичный DNS серверы, например 1.1.1.1 или 8.8.8.8).
 
 ``` bash
-sudo vim /etc/netplan/00-installer-config.yaml
+$ sudo vim /etc/netplan/00-installer-config.yaml
 ```
 ![netplan до](./assets/9.png)
 ![netplan после](./assets/10.png)
 
  > Изменили файл /etc/netplan/00-installer-config.yaml, применили изменения в netplan, перезагрузили машину.
 ``` bash
-sudo netplan apply
-reboot
+$ sudo netplan apply
+$ reboot
 ```
 ![применение настроек](./assets/11.png)
 
 > Проверяем, что адреса соотсветствуют заданным в предыдущем пункте.
 ``` bash
-ifconfig
+$ ifconfig
 ```
 ![проверка адреса](./assets/12.png)
 
 > Проверяем успешноли пропингуются удаленные хосты 1.1.1.1 и ya.ru
 ``` bash
-ping 1.1.1.1
-ping ya.ru
+$ ping 1.1.1.1
+$ ping ya.ru
 ```
 ![пингуем 1.1.1.1 ya.ru](./assets/13.png)
 
@@ -119,7 +122,7 @@ ping ya.ru
 > Обновить системные пакеты до последней на момент выполнения задания версии.
 
 ``` bash
-sudo apt update
+$ sudo apt update
 ```
 
 ![Обновление ОС](./assets/14.png)
@@ -130,11 +133,11 @@ sudo apt update
 `sudo` — это утилита, предоставляющая привилегии root для выполнения административных операций в соответствии со своими настройками. Она позволяет легко контролировать доступ к важным приложениям в системе. По умолчанию, при установке Ubuntu первому пользователю (тому, который создаётся во время установки) предоставляются полные права на использование sudo. Т.е. фактически первый пользователь обладает той же свободой действий, что и root.
 
 ``` bash
-sudo usermod -a -G sudo user-1
-su user-1
-cat /etc/hostname
-sudo hostname deltajed-server-2
-su deltajed
+$ sudo usermod -a -G sudo user-1
+$ su user-1
+$ cat /etc/hostname
+$ sudo hostname deltajed-server-2
+$ su deltajed
 ```
 ![Выдача прав новому пользователю](./assets/15.png)
 
@@ -142,8 +145,8 @@ su deltajed
 
 Чтобы настроить службу автоматической синхронизации времени.
 ``` bash
-sudo timedatectl
-timdatectl show
+$ sudo timedatectl
+$ timdatectl show
 ```
 ![Выдача прав новому пользователю](./assets/16.png)
 
@@ -151,9 +154,9 @@ timdatectl show
 
 1. Установить текстовые редакторы VIM (+ любые два по желанию NANO, MCEDIT, JOE и т.д.)
 ``` bash 
-sudo apt install vim
-sudo apt install nano
-sudo apt install mcedit
+$ sudo apt install vim
+$ sudo apt install nano
+$ sudo apt install mcedit
 ```
 2. Используя каждый из трех выбранных редакторов, создайте файл `test_X.txt`, где `X` -- название редактора, в котором создан файл. Напишите в нём свой никнейм, закройте файл с сохранением изменений.
 3. Используя каждый из трех выбранных редакторов, откройте файл на редактирование, отредактируйте файл, заменив никнейм на строку "21 School 21", закройте файл без сохранения изменений.
@@ -228,24 +231,24 @@ sudo apt install mcedit
 1. Установить службу SSHd.
 
 ``` bash
-sudo apt-get install ssh
-sudo apt install openssh-server
+$ sudo apt-get install ssh
+$ sudo apt install openssh-server
 ```
 ![SSHD](./assets/35.png)
 
 2. Добавить автостарт службы при загрузке системы.
 
 ``` bash
-sudo systemctl enable ssh
-systemctl status ssh
+$ sudo systemctl enable ssh
+$ systemctl status ssh
 ```
 
 ![SSH ENABLE](./assets/36.png)
 
 3. Перенастроить службу SSHd на порт 2022.
 ``` bash
-sudo vim /etc/ssh/sshd_config
-systemctl restart sshd
+$ sudo vim /etc/ssh/sshd_config
+$ systemctl restart sshd
 ```
 ![SSHd](./assets/37.png)
 
@@ -263,16 +266,16 @@ systemctl restart sshd
 - `ps -ef` (получить полный список); 
 
 ``` bash 
-ps -e | grep sshd
+$ ps -e | grep sshd
 ```
 ![ps](./assets/38.png)
 
 5. Перезагрузить систему.
 
 ``` bash
-service ssh restart
-reboot
-netstat -tan 
+$ service ssh restart
+$ reboot
+$ netstat -tan 
 ```
 ![netstat](./assets/39.png)
 
@@ -286,3 +289,95 @@ netstat -tan
 - `Foreign Address` адрес и номер удаленного компьтера к которомц подключен сокет
 - `State` состояние сокетв
 - `0.0.0.0` означает IP-адрес на локальной машине
+
+## Установка и использование утилит top, htop
+
+### Установить и запустить утилиты top и htop.
+
+``` bash 
+$ sudo apt install htop
+$ htop
+```
+
+1. По выводу команды top определить и написать в отчёте:
+* uptime - 49min;
+* количество авторизованных пользователей - 1;
+* общая загрузку системы - 0.00, 0.00, 0.00;
+* общее количество процессов - 120;
+* загрузку cpu - 0.7%;
+* загрузку памяти - 183M/3.84G;
+* pid процесса занимающего больше всего памяти - 828 (top -o %MEM);
+* pid процесса, занимающего больше всего процессорного времени - 1875 (top -o %CPU);
+
+![htop](./assets/40.png)
+
+2. В отчёт вставить скрин с выводом команды htop:
+отсортированному по `PID`, `PERCENT_CPU`, `PERCENT_MEM`, `TIME`.
+
+### SORT BY PID
+![PID](./assets/41.png)
+### SORT BY PERCENT_CPU
+![PERCENT_CPU](./assets/42.png)
+### SORT BY PERCENT_MEM
+![PERCENT_MEM](./assets/43.png)
+### SORT BY TIME
+![TIME](./assets/44.png)
+
+### FILTER 'sshd'
+![FILTER sshd](./assets/45.png)
+### SEARCH 'syslog'
+![SEARCH syslog](./assets/46.png)
+### C добавленным выводом hostname, clock и uptime
+![htop hostname](./assets/47.png)
+
+## Использование утилиты fdisk
+
+``` bash 
+$ sudo fdisk -l
+$ sudo 
+```
+> Название диска: VBOX HARDDISK
+> Размер: 15 GiB
+> Количество секторов: 31457280
+> Размер swap: 2G
+
+
+![fdisk](./assets/48.png)
+
+> Если у вас нет файла подкачки.
+``` bash 
+$ sudo fallocate -l 2G /swapfile
+$ ls -lh /swapfile
+$ sudo chmod 600 /swapfile
+$ ls -lh /swapfile
+$ sudo mkswap /swapfile
+$ sudo swapon /swapfile
+$ swapon --show || free -h
+```
+![swap](./assets/49.png)
+
+## Использование утилиты df
+
+1. `df` для корневого раздела (/):
+``` bash 
+$ df
+```
+* Размер раздела - 10218772;
+* Размер занятого пространства - 4816036;
+* Размер свободного пространства - 4862064;
+* Процент использования - 50%;
+* Единица измерения в выводе - килобайт.
+
+![df](./assets/50.png)
+
+2. `df -Th` для корневого раздела (/):
+``` bash 
+$ df -Th
+```
+* Размер раздела - 9.8G;
+* Рразмер занятого пространства - 4.6G;
+* Размер свободного пространства - 4.7G;
+* Процент использования - 50%
+* Тип файловой системы для раздела - ext4.
+
+![df -Th](./assets/51.png)
