@@ -397,7 +397,7 @@ $ sudo du -sh /var/log /var /home
 $ sudo du -s --block-size=1 /var/log /var /home  
 ```
 ![du -s](./assets/53.png)
-3. Вывести размер всего содержимого в /var/log (не общее, а каждого вложенного элемента, используя *)
+3. Вывести размер всего содержимого в `/var/log` (не общее, а каждого вложенного элемента, используя `*`)
 ``` bash 
 $ sudo du -sh /var/log/*  
 ```
@@ -405,6 +405,88 @@ $ sudo du -sh /var/log/*
 
 ## Установка и использование утилиты ncdu
 
+``` bash 
+$ sudo apt install ncdu
+$ sudo ncdu
+```
+![ncdu](./assets/55.png)
+
+- Вывести размер папок `/home`, `/var`, `/var/log`.
+
+### `/home`
+![ncdu /home](./assets/56.png)
+
+### `/var`
+![ncdu /var](./assets/57.png)
+
+### `/var/log`
+![ncdu /var/log](./assets/58.png)
+
 ## Работа с системными журналами
 
+- Открыть для просмотра:
+
+1. `/var/log/dmesg`
+
+``` bash 
+$ sudo vim /var/log/dmesg
+```
+![sudo vim /var/log/dmesg](./assets/59.png)
+2. `/var/log/syslog`
+
+``` bash 
+$ sudo vim /var/log/syslog
+```
+![sudo vim /var/log/syslog](./assets/60.png)
+
+3. `/var/log/auth.log`
+
+``` bash 
+$ sudo vim /var/log/auth.log
+```
+![sudo vim /var/log/auth.log](./assets/61.png)
+
+* Последняя успешная авторизация: Mar 5 21:18:11;
+* Имя пользователя: deltajed;
+* Метод входа в систему: pam-unix.
+
+4. `Перезапустить службу SSHd.`
+
+``` bash 
+$ sudo systemctl restart ssh
+```
+![restart ssh](./assets/62.png)
+
+
 ## Использование планировщика заданий CRON
+
+``` bash 
+$ sudo crtontab -e
+```
+![crtontab -e](./assets/63.png)
+
+1. Используя планировщик заданий, запустим команду uptime через каждые 2 минуты.
+
+``` vim 
+*/2 * * * *
+```
+![new crtontab](./assets/64.png)
+
+2. Найти в системных журналах строчки (минимум две в заданном временном диапазоне) о выполнении.
+
+![log cron](./assets/65.png)
+
+3. Вывести на экран список текущих заданий для CRON.
+
+``` bash 
+$ sudo crtontab -i
+```
+![log cron](./assets/66.png)
+
+4. Удалите все задания из планировщика заданий.
+
+``` bash 
+$ sudo crtontab -r
+$ sudo crtontab -l
+```
+![del cron](./assets/67.png)
