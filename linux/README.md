@@ -479,7 +479,7 @@ $ sudo crtontab -e
 3. Вывести на экран список текущих заданий для CRON.
 
 ``` bash 
-$ sudo crtontab -i
+$ sudo crtontab -l
 ```
 ![log cron](./assets/66.png)
 
