@@ -462,3 +462,60 @@ $ ping -c 1 10.30.0.111
 > Для r2 настроить в файле /etc/dhcp/dhcpd.conf конфигурацию службы DHCP:
 
 1. Указать адрес маршрутизатора по-умолчанию, DNS-сервер и адрес внутренней сети.
+
+![dns](./assets/41.png)
+
+2. В файле `resolv.conf` прописать nameserver 8.8.8.8:
+
+![resolv.conf](./assets/42.png)
+
+Перезагрузить службу DHCP командой systemctl restart isc-dhcp-server. Машину ws21 перезагрузить при помощи reboot и через ip a показать, что она получила адрес. Также пропинговать ws22 с ws21.
+
+> Для `r2`
+``` shell 
+$ systemctl restart isc-dhcp-server
+```
+![isc-dhcp-server](./assets/43.png)
+
+> Для `ws21`
+``` shell 
+$ reboot
+$ ip a
+```
+![isc-dhcp-server](./assets/44.png)
+
+> Указать MAC адрес у ws11, для этого в `etc/netplan/00-installer-config.yaml` надо добавить строки: `macaddress`: 10:10:10:10:10:BA, `dhcp4`: true
+
+![isc-dhcp-server](./assets/45.png)
+
+> Для `r1` настроить аналогично `r2`, но сделать выдачу адресов с жесткой привязкой к MAC-адресу (ws11). Провести аналогичные тесты В файле `/etc/dhcp/dhcpd.conf` настроить конфигурацию службы DHCP с жесткой привязкой к MAC-адресу (ws11)
+
+![isc-dhcp-server](./assets/46.png)
+
+![isc-dhcp-server](./assets/47.png)
+
+> Перезагрузить службу DHCP командой systemctl restart isc-dhcp-server. \
+> Машину ws11 перезагрузить при помощи reboot и через ip a показать, что она получила адрес.
+
+> Для `r1`
+``` shell 
+$ systemctl restart isc-dhcp-server
+```
+
+![isc-dhcp-server](./assets/48.png)
+``` shell 
+$ ip a
+```
+![isc-dhcp-server](./assets/49.png)
+
+> Обновление адреса для машины ws21 при помощи запроса его у dhcp сервера при помощи команды; 
+
+``` shell
+$ sudo dhclient -r enp0s3
+$ sudo dhclient enp0s3
+```
+
+`ДО`
+![isc-dhcp-server](./assets/50.png)
+`ПОСЛЕ`
+![isc-dhcp-server](./assets/51.png)
