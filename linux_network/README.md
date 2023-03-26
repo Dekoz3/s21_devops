@@ -21,7 +21,7 @@
     5.5. [Построение списка маршрутизаторов](#55-построение-списка-маршрутизаторов) \
     5.6. [Использование протокола ICMP при маршрутизации](#56-использование-протокола-icmp-при-маршрутизации)
 6. [Динамическая настройка IP с помощью DHCP](#6-динамическая-настройка-ip-с-помощью-dhcp)
-
+7. [NAT](#7-nat)
 
 ## 1. [Инструмент ipcalc](#1-инструмент-ipcalc)
 
@@ -519,3 +519,31 @@ $ sudo dhclient enp0s3
 ![isc-dhcp-server](./assets/50.png)
 `ПОСЛЕ`
 ![isc-dhcp-server](./assets/51.png)
+
+## 7. [NAT](#7-nat)
+
+> В файле `/etc/apache2/ports.conf` на ws22 и r1 изменить строку Listen 80 на Listen 0.0.0.0:80, то есть сделать сервер Apache2 общедоступным
+
+``` shell
+$ sudo apt install apache2
+```
+
+![NAT](./assets/52.png)
+![NAT](./assets/53.png)
+
+> Запустить веб-сервер Apache командой service apache2 start на ws22 и r1;
+
+![NAT](./assets/54.png)
+
+> Добавить в фаервол, созданный по аналогии с фаерволом из [Части 4](#4-сетевой-экран), на r2 следующие правила:
+
+1. Удаление правил в таблице filter - iptables -F
+2. Удаление правил в таблице "NAT" - iptables -F -t nat
+3. Отбрасывать все маршрутизируемые пакеты - iptables --policy FORWARD DROP
+
+![NAT](./assets/55.png)
+
+``` shell
+$ sudo chmod +x /etc/firewall.sh
+$ sudo sh /etc/firewall.sh
+```
