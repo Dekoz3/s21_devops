@@ -591,15 +591,15 @@ $ ping 10.100.0.11
 
 ![SSH](./assets/62.png)
 
-> Воспользоваться Local TCP forwarding с ws21 до ws22, чтобы получить доступ к веб-серверу на ws22 с ws21
+> Воспользоваться Local TCP forwarding с ws21 до ws22, чтобы получить доступ к веб-серверу на ws22 с ws21;
 
 ![Local TCP](./assets/63.png)
 
-> Воспользоваться Remote TCP forwarding c ws11 до ws22, чтобы получить доступ к веб-серверу на ws22 с ws11 
+> Воспользоваться Remote TCP forwarding c ws11 до ws22, чтобы получить доступ к веб-серверу на ws22 с ws11;
 
 ![Remote TCP](./assets/64.png)
 
 > Для проверки, сработало ли подключение в обоих предыдущих пунктах, перейдите во второй терминал (например, клавишами Alt + F2) и выполните команду:
 
 ![Remote TCP](./assets/65.png)
-![Remote TCP](./assets/65.png)
+![Remote TCP](./assets/66.png)
