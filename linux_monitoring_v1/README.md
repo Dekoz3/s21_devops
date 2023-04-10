@@ -2,6 +2,7 @@
 
 1. [Проба пера](#1-проба-пера)
 2. [Исследование системы](#2-исследование-системы)
+3. [Визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы)
 
 
 ### 1. [Проба пера](#1-проба-пера)
@@ -47,7 +48,7 @@ if [ -z "$1" ]; then
 fi
 
 # Проверяем, что параметр не является числом
-if echo "$1" | grep -qE '^[+-]?[0-9]+\.?[0-9]*$|^[+-]?[0-9]*\.?[0-9]+$'; then
+if echo "$1" | grep -qE '^[A-Z]?+[a-z]?+[+-.,=]?[0-9]+[A-Z]?+[a-z]?+([+-.,=][0-9]+)?+[+-.,=]?+[A-Z]?+[a-z]?$'; then
     echo "Ошибка: параметр не может быть числом."
     exit 1
 fi
@@ -174,7 +175,7 @@ source ./utils.sh
 echo "HOSTNAME = $HOSTNAME"
 echo "TIMEZONE = $(get_timezone)"
 echo "USER = $USER"
-echo "OS = $OS"
+echo "OS = $(get_os_name)"
 echo "DATE = $DATE"
 echo "UPTIME = $UPTIME"
 echo "UPTIME_SEC = $UPTIME_SEC"
@@ -200,7 +201,7 @@ if [[ ${choice} =~ ^[Yy]$ ]]; then
     echo "HOSTNAME = $HOSTNAME"
     echo "TIMEZONE = $(get_timezone)"
     echo "USER = $USER"
-    echo "OS = $OS"
+    echo "OS = $(get_os_name)"
     echo "DATE = $DATE"
     echo "UPTIME = $UPTIME"
     echo "UPTIME_SEC = $UPTIME_SEC"
@@ -227,7 +228,7 @@ fi
 # Получение сетевого имени
 HOSTNAME=$(hostname)
 
-# Получение
+# Получение текущиего пользователь который запустил скрипт
 USER=$(whoami)
 
 # Получение текущего время в виде: 12 May 2020 12:24:36
@@ -261,9 +262,6 @@ function get_os_name() {
     echo "Unknown"
   fi
 }
-
-# Получение текущиего пользователь который запустил скрипт
-OS=$(get_os_name)
 
 # Функция для получения IP-адрес машины в любом из сетевых интерфейсов
 function get_ip() {
@@ -343,10 +341,36 @@ function get_space_root_free() {
   Information saved to file: 10_04_23_03_39_46.status
 </details>
 
+## 3. [Визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы)
+
+**== Задание ==**
+
+Написать bash-скрипт. 
+За основу взять скрипт из [Исследование системы](#2-исследование-системы) и убрать из него часть, ответственную за сохранение данных в файл. Скрипт запускается с 4 параметрами. 
+> Параметры числовые. От 1 до 6, например: `main.sh 1 3 4 5` \
+> Обозначения цветов: (1 - white, 2 - red, 3 - green, 4 - blue, 5 – purple, 6 - black)
+- **Параметр 1** - это фон названий значений (HOSTNAME, TIMEZONE, USER и т.д.)
+- **Параметр 2** - это цвет шрифта названий значений (HOSTNAME, TIMEZONE, USER и т.д.)
+- **Параметр 3** - это фон значений (после знака '=')
+- **Параметр 4** - это цвет шрифта значений (после знака '=')
+
+1. Цвета шрифта и фона одного столбца не должны совпадать.
+2. При вводе совпадающих значений должно выводится сообщение, описывающее проблему, и предложение повторно вызвать скрипт.
+3. После вывода сообщения, программа должна корректно завершится.
+
+> Часть логики.
+```bash
+#!/bin/bash
+
+
+
+```
+
+
 ## Task lists
 
 - [x] First effort :tada:
-- [x] System research
-- [ ] Visual output design for the system research script
+- [x] System research :tada:
+- [ ] Visual output design for the system research script :tada:
 - [ ] Configuring visual output design for the system research script.
 - [ ] File system research
