@@ -15,9 +15,15 @@ UPTIME=$(uptime -p)
 # Получение времени работы системы в секундах
 UPTIME_SEC=$(awk '{print int($1)}' /proc/uptime)
 
-# Функция для получения временной зона в виде: America/New_York UTC -5 
+# Функция для получения временной зона в виде: America/New_York UTC -5
 function get_timezone() {
-  local timezone=$(timedatectl | grep 'Time zone' | awk '{print $3, $4}' | sed 's/,\([^,]*\)$/)\1/')
+  # local timezone=$(timedatectl | grep 'Time zone' | awk '{print $3, $4}' | sed 's/,\([^,]*\)$/)\1/')
+  local timezone=$(timedatectl | grep "Time zone" | awk '{print $3}')
+  if [ $(date +"%:z" | awk '{split($0,a,":"); print a[1]}' | cut -c2) == "0" ]; then
+    timezone="$timezone UTC $(date +"%:z" | awk '{split($0,a,""); print a[1]""a[3]}')"
+  else
+    timezone="$timezone UTC $(date +"%:z" | awk '{split($0,a,":"); print a[1]}')"
+  fi
   echo "${timezone}"
 }
 
