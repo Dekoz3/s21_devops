@@ -59,12 +59,12 @@ echo "Executable files = $exe_files"
 echo "Log files (with the extension .log) = $log_files"
 echo "Archive files = $archive_files"
 echo "Symbolic links = $symlinks"
-echo "\nTOP 10 files of maximum size arranged in descending order (path, size and type):"
+echo "TOP 10 files of maximum size arranged in descending order (path, size and type):"
 echo "$largest_files"
 echo "TOP 10 executable files of the maximum size arranged in descending order (path, size and MD5 hash of file):"
 echo "$largest_executable_files"
 
 # Завершение таймера и рассчет время выполнения
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc -l)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
 echo "Script execution time (in seconds) = $elapsed_time"
