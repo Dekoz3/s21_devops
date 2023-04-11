@@ -1,10 +1,12 @@
 # Linux Monitoring v1.0
 
-1. [Проба пера](#1-проба-пера)
-2. [Исследование системы](#2-исследование-системы)
-3. [Визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы)
-4. [Конфигурирование визуального оформления вывода для скрипта исследования системы](#4-конфигурирование-визуального-оформления-вывода-для-скрипта-исследования-системы)
-5. [Исследование файловой системы](#5-исследование-файловой-системы)
+- [Linux Monitoring v1.0](#linux-monitoring-v10)
+    - [1. Проба пера](#1-проба-пера)
+  - [2. Исследование системы](#2-исследование-системы)
+  - [3. Визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы)
+  - [4. Конфигурирование визуального оформления вывода для скрипта исследования системы](#4-конфигурирование-визуального-оформления-вывода-для-скрипта-исследования-системы)
+  - [5. Исследование файловой системы](#5-исследование-файловой-системы)
+  - [Task lists](#task-lists)
 
 ### 1. [Проба пера](#1-проба-пера)
 
@@ -20,7 +22,7 @@
 
 Допустим, что скрипт находится в файле `main.sh` в текущей директории. Чтобы выдать права на выполнение скрипта, нужно выполнить следующую команду:
 
-``` bash 
+``` bash
 chmod +x main.sh
 ```
 
@@ -28,9 +30,10 @@ chmod +x main.sh
 
 После этого скрипт можно запустить, используя команду `./main.sh`, предварительно перейдя в директорию, где находится скрипт, если это необходимо.
 
-``` bash 
+``` bash
 ./main.sh
 ```
+
 > Сам скрипт находится в папке `01`
 
 ```bash
@@ -114,6 +117,7 @@ echo "Параметр: $1"
 ``` bash
 Ошибка: параметр не может быть пустым.
 ```
+
 5. Параметр является числом:
 
 ``` bash
@@ -125,6 +129,7 @@ echo "Параметр: $1"
 ``` bash
 Ошибка: скрипт принимает только один параметр.
 ```
+
 6. Параметр является числом:
 
 ``` bash
@@ -136,6 +141,7 @@ echo "Параметр: $1"
 ``` bash
 Ошибка: параметр содержит цифру.
 ```
+
 </details>
 
 ## 2. [Исследование системы](#2-исследование-системы)
@@ -166,6 +172,7 @@ echo "Параметр: $1"
 
 > Сам скрипт находится в папке `02` \
 > `main.sh`
+
 ``` bash
 #!/bin/bash
 
@@ -223,6 +230,7 @@ fi
 ```
 
 > `utils.sh`
+
 ``` bash
 #!/bin/bash
 
@@ -325,6 +333,7 @@ function get_space_root_free() {
   echo "${space_root_free} MB"
 }
 ```
+
 <details>
   <summary>Вывод</summary>
   HOSTNAME = linux-lenovo <br>
@@ -352,10 +361,11 @@ function get_space_root_free() {
 
 **== Задание ==**
 
-Написать bash-скрипт. 
-За основу взять скрипт из [Исследование системы](#2-исследование-системы) и убрать из него часть, ответственную за сохранение данных в файл. Скрипт запускается с 4 параметрами. 
+Написать bash-скрипт.
+За основу взять скрипт из [Исследование системы](#2-исследование-системы) и убрать из него часть, ответственную за сохранение данных в файл. Скрипт запускается с 4 параметрами.
 > Параметры числовые. От 1 до 6, например: `main.sh 1 3 4 5` \
 > Обозначения цветов: (1 - white, 2 - red, 3 - green, 4 - blue, 5 – purple, 6 - black)
+
 - **Параметр 1** - это фон названий значений (HOSTNAME, TIMEZONE, USER и т.д.)
 - **Параметр 2** - это цвет шрифта названий значений (HOSTNAME, TIMEZONE, USER и т.д.)
 - **Параметр 3** - это фон значений (после знака '=')
@@ -366,6 +376,7 @@ function get_space_root_free() {
 3. После вывода сообщения, программа должна корректно завершится.
 
 > `main.sh`
+
 ```bash
 #!/bin/bash
 
@@ -448,14 +459,16 @@ printf "\e[${bg_val_names};${font_val_names}mSPACE_ROOT_FREE = \e[0m\e[${bg_vals
 
 exit 0
 ```
+
 > Логика bash-скрипта `utils.sh` не изменилася из [Исследование системы](#2-исследование-системы)
 
 Примеры вывода:
+
 1. Корректный ввод `./main.sh 1 2 6 5`
 ![./main.sh 1 2 6 5](./assets/lm_03_01.png)
 2. Корректный ввод `./main.sh 3 4 1 5`
 ![./main.sh 3 4 1 5](./assets/lm_03_02.png)
-3. Ввод без параметров 
+3. Ввод без параметров
 ![./main.sh](./assets/lm_03_03.png)
 4. Ввод с параметром, который не входит в диапазон значений
 ![./main.sh 3 4 1 7](./assets/lm_03_04.png)
@@ -464,32 +477,41 @@ exit 0
 
 **== Задание ==**
 
-Написать bash-скрипт. За основу берется скрипт из [визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы). Обозначения цветов аналогичные. Скрипт запускается без параметров. 
+Написать bash-скрипт. За основу берется скрипт из [визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы). Обозначения цветов аналогичные. Скрипт запускается без параметров.
 Параметры задаются в конфигурационном файле до запуска скрипта.
+
 - Конфигурационный файл должен иметь вид:
+
 > `config.cfg`
+
 ``` yaml
 column1_background=2
 column1_font_color=4
 column2_background=5
 column2_font_color=1
 ```
+
 Если один или несколько параметров не заданы в конфигурационном файле, то цвет должен подставляться из цветовой схемы, заданной по умолчанию. ***(Выбор на усмотрение разработчика)***.
 После вывода информации о системе из [визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы), нужно, сделав отступ в одну пустую строку, вывести цветовую схему в следующем виде:
+
 ``` yaml
 Column 1 background = 2 (red)
 Column 1 font color = 4 (blue)
 Column 2 background = 5 (purple)
 Column 2 font color = 1 (white)
 ```
+
 При запуске скрипта с цветовой схемой по умолчанию вывод должен иметь вид:
+
 ``` yaml
 Column 1 background = default (black)
 Column 1 font color = default (white)
 Column 2 background = default (red)
 Column 2 font color = default (blue)
 ```
+
 > `main.sh`
+
 ``` bash
 #!/bin/bash
 
@@ -614,6 +636,7 @@ exit 0
 > Логика bash-скрипта `utils.sh` не изменилася из [Исследование системы](#2-исследование-системы)
 
 Примеры вывода:
+
 1. Корректный ввод из файла с конфигурацией `./config.cfg`
 ![./main.sh](./assets/lm_04_01.png)
 2. Отоброжение из стандартного пресета `./main.sh`
@@ -625,8 +648,8 @@ exit 0
 5. Некорректный ввод фон и цвет текста совпадают
 ![./main.sh](./assets/lm_04_05.png)
 
-
 ## 5. [Исследование файловой системы](#5-исследование-файловой-системы)
+
  **== Задание ==**
 
 Написать bash-скрипт. Скрипт запускается с одним параметром.
@@ -667,8 +690,93 @@ TOP 10 executable files of the maximum size arranged in descending order (path, 
 2 - /var/log/two/two.exe, 9 MB, 53c8fdfcbb60cf8e1a1ee90601cc8fe2  
 etc up to 10  
 Script execution time (in seconds) = 1.5
-
 ```
+
+> `main.sh`
+
+``` bash
+#!/bin/bash
+
+#  Начало таймера
+start_time=$(date +%s.%N)
+
+# Проверяем, предоставил ли пользователь аргумент пути
+if [ $# -eq 0 ]; then
+    echo "Error: Directory path argument required."
+    echo "       Usage: $0 <directory>"
+    exit 1
+fi
+
+dir_path=$1
+
+# Проверяем, закрыл ли пользователь путь "/"
+if [ "${dir_path: -1}" != "/" ]; then
+    echo "The directory path must end with '/'"
+    exit 1
+fi
+
+# Проверяем, является ли предоставленный аргумент каталогом
+if [ ! -d "$dir_path" ]; then
+    echo "Error: '$dir_path' the specified directory does not exist."
+    exit 1
+fi
+
+# Общее количество папок (включая все вложенные)
+total_folders=$(find "$dir_path" -type d | wc -l)
+
+# Топ-5 папок максимального размера, расположенных в порядке убывания (путь и размер)
+top_folders=$(du -h "$dir_path"* | sort -hr | head -n 5 | awk '{print NR " - " $2 ", " $1}')
+
+# Общее количество файлов
+total_files=$(find "$dir_path" -type f | wc -l)
+
+# Количество конфигурационных файлов (с расширением .conf), текстовых файлов, исполняемых файлов, файлов журнала (файлы с расширением .log), архивов, символических ссылок
+conf_files=$(find "$dir_path" -type f -name "*.conf" | wc -l)
+txt_files=$(find "$dir_path" -type f -name "*.txt" | wc -l)
+exe_files=$(find "$dir_path" -type f -executable | wc -l)
+log_files=$(find "$dir_path" -type f -name "*.log" | wc -l)
+archive_files=$(find "$dir_path" -type f \( -name "*.zip" -o -name "*.7z" -o -name "*.tar" -o -name "*.rar" -o -name "*.gz" \) | wc -l)
+symlinks=$(find "$dir_path" -type l | wc -l)
+
+# Топ 10 файлов с самым большим весом в порядке убывания (путь, размер и тип)
+largest_files="$(find "$dir_path" -type f -exec du -h {} + | sort -hr | sed -n '1,10'p | awk '{printf("%d - %s, %s, ", NR, $2, $1); system("bash -c '\''file -b --mime-type "$2"'\''")}')"
+
+# Топ 10 исполняемых файлов с самым большим весом в порядке убывания (путь, размер и хеш)
+largest_executable_files=$(find "$dir_path" -type f -executable -exec du -h {} +| sort -hr | head -n 10 | awk '{printf "%d - %s, %s, ", NR, $2, $1; system("md5sum " $2 " | cut -d\" \" -f1")}')
+
+# Вывод на экран
+echo "Total number of folders (including all nested ones) = $total_folders"
+echo "TOP 5 folders of maximum size arranged in descending order (path and size):"
+echo "$top_folders"
+echo "Total number of files = $total_files"
+echo "Number of:"
+echo "Configuration files (with the .conf extension) = $conf_files"
+echo "Text files = $txt_files"
+echo "Executable files = $exe_files"
+echo "Log files (with the extension .log) = $log_files"
+echo "Archive files = $archive_files"
+echo "Symbolic links = $symlinks"
+echo "TOP 10 files of maximum size arranged in descending order (path, size and type):"
+echo "$largest_files"
+echo "TOP 10 executable files of the maximum size arranged in descending order (path, size and MD5 hash of file):"
+echo "$largest_executable_files"
+
+# Завершение таймера и рассчет время выполнения
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc -l)
+echo "Script execution time (in seconds) = $elapsed_time"
+```
+
+Примеры вывода:
+
+1. Корректный путь к каталогу 
+![./main.sh](./assets/lm_05_01.png)
+2. Некорректный путь без '/'
+![./main.sh](./assets/lm_05_02.png)
+3. Запуск без параметров
+![./main.sh](./assets/lm_05_03.png)
+4. Отсутвует каталог
+![./main.sh](./assets/lm_05_04.png)
 
 ## Task lists
 
@@ -676,5 +784,4 @@ Script execution time (in seconds) = 1.5
 - [x] System research
 - [x] Visual output design for the system research script
 - [x] Configuring visual output design for the system research script.
-- [ ] File system research
-
+- [x] File system research
