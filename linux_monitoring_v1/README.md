@@ -4,6 +4,7 @@
 2. [Исследование системы](#2-исследование-системы)
 3. [Визуальное оформление вывода для скрипта исследования системы](#3-визуальное-оформление-вывода-для-скрипта-исследования-системы)
 4. [Конфигурирование визуального оформления вывода для скрипта исследования системы](#4-конфигурирование-визуального-оформления-вывода-для-скрипта-исследования-системы)
+5. [Исследование файловой системы](#5-исследование-файловой-системы)
 
 ### 1. [Проба пера](#1-проба-пера)
 
@@ -242,7 +243,13 @@ UPTIME_SEC=$(awk '{print int($1)}' /proc/uptime)
 
 # Функция для получения временной зона в виде: America/New_York UTC -5 
 function get_timezone() {
-  local timezone=$(timedatectl | grep 'Time zone' | awk '{print $3, $4}' | sed 's/,\([^,]*\)$/)\1/')
+  # local timezone=$(timedatectl | grep 'Time zone' | awk '{print $3, $4}' | sed 's/,\([^,]*\)$/)\1/')
+  local timezone=$(timedatectl | grep "Time zone" | awk '{print $3}')
+  if [ $(date +"%:z" | awk '{split($0,a,":"); print a[1]}' | cut -c2) == "0" ]; then
+    timezone="$timezone UTC $(date +"%:z" | awk '{split($0,a,""); print a[1]""a[3]}')"
+  else
+    timezone="$timezone UTC $(date +"%:z" | awk '{split($0,a,":"); print a[1]}')"
+  fi
   echo "${timezone}"
 }
 
@@ -426,6 +433,7 @@ printf "\e[${bg_val_names};${font_val_names}mHOSTNAME = \e[0m\e[${bg_vals};${fon
 printf "\e[${bg_val_names};${font_val_names}mTIMEZONE = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$(get_timezone)"
 printf "\e[${bg_val_names};${font_val_names}mUSER = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$USER"
 printf "\e[${bg_val_names};${font_val_names}mOS = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$(get_os_name)"
+printf "\e[${bg_val_names};${font_val_names}mDATE = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$DATE"
 printf "\e[${bg_val_names};${font_val_names}mUPTIME = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$UPTIME"
 printf "\e[${bg_val_names};${font_val_names}mUPTIME_SEC = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$UPTIME_SEC"
 printf "\e[${bg_val_names};${font_val_names}mIP = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$(get_ip)"
@@ -562,6 +570,7 @@ printf "\e[${bg_val_names};${font_val_names}mHOSTNAME = \e[0m\e[${bg_vals};${fon
 printf "\e[${bg_val_names};${font_val_names}mTIMEZONE = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$(get_timezone)"
 printf "\e[${bg_val_names};${font_val_names}mUSER = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$USER"
 printf "\e[${bg_val_names};${font_val_names}mOS = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$(get_os_name)"
+printf "\e[${bg_val_names};${font_val_names}mDATE = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$DATE"
 printf "\e[${bg_val_names};${font_val_names}mUPTIME = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$UPTIME"
 printf "\e[${bg_val_names};${font_val_names}mUPTIME_SEC = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$UPTIME_SEC"
 printf "\e[${bg_val_names};${font_val_names}mIP = \e[0m\e[${bg_vals};${font_vals}m%s\e[0m\n" "$(get_ip)"
@@ -615,6 +624,51 @@ exit 0
 ![./main.sh](./assets/lm_04_04.png)
 5. Некорректный ввод фон и цвет текста совпадают
 ![./main.sh](./assets/lm_04_05.png)
+
+
+## 5. [Исследование файловой системы](#5-исследование-файловой-системы)
+ **== Задание ==**
+
+Написать bash-скрипт. Скрипт запускается с одним параметром.
+Параметр - это абсолютный или относительный путь до какой-либо директории. Параметр должен заканчиваться знаком '/', например: `main.sh /var/log/`
+
+Скрипт должен выводить следующую информацию о каталоге, указанном в параметре:
+
+- Общее число папок, включая вложенные
+- Топ 5 папок с самым большим весом в порядке убывания (путь и размер)
+- Общее число файлов
+- Число конфигурационных файлов (с расширением .conf), текстовых файлов, исполняемых файлов, логов (файлов с расширением .log), архивов, символических ссылок
+- Топ 10 файлов с самым большим весом в порядке убывания (путь, размер и тип)
+- Топ 10 исполняемых файлов с самым большим весом в порядке убывания (путь, размер и хеш)
+- Время выполнения скрипта
+
+Скрипт должен вывести на экран информацию в виде:
+
+```shell
+Total number of folders (including all nested ones) = 6  
+TOP 5 folders of maximum size arranged in descending order (path and size):  
+1 - /var/log/one/, 100 GB  
+2 - /var/log/two/, 100 MB  
+etc up to 5
+Total number of files = 30
+Number of:  
+Configuration files (with the .conf extension) = 1 
+Text files = 10  
+Executable files = 5
+Log files (with the extension .log) = 2  
+Archive files = 3  
+Symbolic links = 4  
+TOP 10 files of maximum size arranged in descending order (path, size and type):  
+1 - /var/log/one/one.exe, 10 GB, exe  
+2 - /var/log/two/two.log, 10 MB, log  
+etc up to 10  
+TOP 10 executable files of the maximum size arranged in descending order (path, size and MD5 hash of file)  
+1 - /var/log/one/one.exe, 10 GB, 3abb17b66815bc7946cefe727737d295  
+2 - /var/log/two/two.exe, 9 MB, 53c8fdfcbb60cf8e1a1ee90601cc8fe2  
+etc up to 10  
+Script execution time (in seconds) = 1.5
+
+```
 
 ## Task lists
 
