@@ -11,7 +11,8 @@
 ## Содержание
 
 1. [Linux Monitoring v2.0](#linux-monitoring-v20) \
-    1.1. [Генератор файлов](#1-генератор-файлов)
+    1.1. [Генератор файлов](#1-генератор-файлов) \
+    1.2. [Засорение файловой системы](#2-засорение-файловой-системы)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -21,12 +22,12 @@
 Написать bash-скрипт. Скрипт запускается с 6 параметрами.
 Пример запуска скрипта: `main.sh /opt/test 4 az 5 az.az 3kb`
 
-- Параметр 1 - это абсолютный путь
-- Параметр 2 - количество вложенных папок
-- Параметр 3 - список букв английского алфавита, используемый в названии папок (не более 7 знаков)
-- Параметр 4 - количество файлов в каждой созданной папке
-- Параметр 5 - список букв английского алфавита, используемый в имени файла и расширении (не более 7 знаков для имени, не более 3 знаков для расширения)
-- Параметр 6 - размер файлов (в килобайтах, но не более 100)
+- **Параметр 1** - это абсолютный путь
+- **Параметр 2** - количество вложенных папок
+- **Параметр 3** - список букв английского алфавита, используемый в названии папок (не более 7 знаков)
+- **Параметр 4** - количество файлов в каждой созданной папке
+- **Параметр 5** - список букв английского алфавита, используемый в имени файла и расширении (не более 7 знаков для имени, не более 3 знаков для расширения)
+- **Параметр 6** - размер файлов (в килобайтах, но не более 100)
 
 Имена папок и файлов должны состоять только из букв, указанных в параметрах, и использовать каждую из них хотя бы 1 раз.
 
@@ -163,16 +164,175 @@ echo "Script execution time (in seconds) = $elapsed_time"
 1. Корректная работа
 ![Нормальная работа скрипта](./assets/lm_2_01_01.png)
 2. Размер создаваемого файла больше 100KB
-![Нормальная работа скрипта](./assets/lm_2_01_02.png)
+![Больше 100KB](./assets/lm_2_01_02.png)
 3. Количество файлов или папок указано не числом
-![Нормальная работа скрипта](./assets/lm_2_01_03.png)
+![Указано не числом](./assets/lm_2_01_03.png)
 4. Отсутвуют аргументы
-![Нормальная работа скрипта](./assets/lm_2_01_04.png)
+![Отсутвуют аргументы](./assets/lm_2_01_04.png)
+
+## 2. Засорение файловой системы
+
+**== Задание ==**
+
+Написать bash-скрипт. Скрипт запускается с 3 параметрами. Пример запуска скрипта: 
+`main.sh az az.az 3Mb`
+
+- **Параметр 1** - список букв английского алфавита, используемый в названии папок (не более 7 знаков). 
+- **Параметр 2** - список букв английского алфавита, используемый в имени файла и расширении (не более 7 знаков для имени, не более 3 знаков для расширения). 
+- **Параметр 3** - размер файла (в Мегабайтах, но не более 100).
+
+Имена папок и файлов должны состоять только из букв, указанных в параметрах, и использовать каждую из них хотя бы 1 раз.
+
+Длина этой части имени должна быть от 5 знаков, плюс дата запуска скрипта в формате DDMMYY, отделённая нижним подчёркиванием, например: 
+`./aaazz_021121/, ./aaazzzz_021121`
+
+При этом, если для имени папок или файлов были заданы символы az, то в названии файлов или папок не может быть обратной записи: 
+`./zaaa_021121/`, т.е. порядок указанных в параметре символов должен сохраняться.
+
+При запуске скрипта, в различных (любых, кроме путей содержащих `bin` или `sbin`) местах файловой системы, должны быть созданы папки с файлами.
+Количество вложенных папок - до 100. Количество файлов в каждой папке - случайное число (для каждой папки своё).
+
+Скрипт должен остановить работу, когда в файловой системе (в разделе `/`) останется 1 Гб свободного места.
+
+Свободное место в файловой системе определять командой: `df -h /`
+Записать лог файл с данными по всем созданным папкам и файлам (полный путь, дата создания, размер для файлов).
+
+В конце работы скрипта, вывести на экран время начало работы скрипта, время окончания и общее время его работы. Дополнить этими данными лог файл.
+
+> За основу взяли скрипт из [генератор файлов](#1-генератор-файлов) и в итоге получаем `main.sh` 
+ 
+``` bash
+#!/bin/bash
+
+function generate_name() {
+    local chars="$1"
+    local min_length=5
+    local name=""
+    
+    for ((i=0; i<$min_length; i++)); do
+        name="${name}${chars:$((RANDOM % ${#chars})):1}"
+    done
+    
+    echo "${name}"
+}
+
+# Check if there is enough space to create files
+function check_space() {
+    local available_space=$(df --output=avail / | tail -1)
+    local min_space=$((1024 * 1024))
+    
+    if [[ $available_space -lt $min_space ]]; then
+        echo "Error: Not enough space to create files. Aborting."
+        exit 1
+    fi
+}
+
+# Define function to create folder and files with specified names and size
+function create_folders_and_files() {
+    local folder_chars="$1"
+    local file_chars="$2"
+    local ext_chars="${file_chars:0:3}"
+    local file_size_mb="$3"
+    local log_file="$4"
+    local date_suffix=$(date '+%d%m%y')
+    
+    for ((i=0; i<100; i++)); do
+        check_space
+        
+        local folder_name="$(generate_name "$folder_chars")_${date_suffix}"
+        local folder_path="$(pwd)/log/${folder_name}"
+        mkdir -p "$folder_path"
+        
+        local num_files=$((RANDOM % 100 + 1))
+        
+        for ((j=0; j<$num_files; j++)); do
+            check_space
+            
+            local file_name="$(generate_name "$file_chars")_${date_suffix}"
+            local file_ext="$(generate_name "$ext_chars")"
+            local file_path="${folder_path}/${file_name}.${file_ext}"
+            
+            truncate -s "${file_size_mb}M" "$file_path"
+            echo "$(date '+%Y-%m-%d %H:%M:%S') | Created: ${file_path} | Size: ${file_size_mb}M" >> "$log_file"
+        done
+    done
+}
+
+function main() {
+    if [[ $# -ne 3 ]]; then
+        echo "Error: Arguments required."
+        echo "      Usage: $0 <folder_chars> <file_chars> <file_size_mb>"
+        exit 1
+    fi
+    
+    local folder_chars="$1"
+    local file_chars="$2"
+    local file_size_mb="$3"
+    
+    if ! [[ $file_size_mb =~ ^[0-9]+$ ]]; then
+        echo "Error: $0 ... ... <file_size_mb> is not a number."
+        exit 1
+    fi
+    
+    if [[ $file_size_mb -gt 100 ]]; then
+        echo "Error: File size should not exceed 100MB."
+        exit 1
+    fi
+    
+    local log_file="$(pwd)/log/creation_log_$(date '+%d%m%y').txt"
+    local start_time=$(date '+%Y-%m-%d %H:%M:%S')
+    local start_seconds=$(date +%s)
+    
+    create_folders_and_files "$folder_chars" "$file_chars" "$file_size_mb" "$log_file"
+    
+    local end_time=$(date '+%Y-%m-%d %H:%M:%S')
+    local end_seconds=$(date +%s)
+    local total_time=$((end_seconds - start_seconds))
+    
+    echo "Start time: $start_time" >> "$log_file"
+    echo "End time: $end_time" >> "$log_file"
+    echo "Total running time: ${total_time} seconds" >> "$log_file"
+    
+    echo "Start time: $start_time"
+    echo "End time: $end_time"
+    echo "Total running time: ${total_time} seconds"
+}
+
+main "$@"
+```
+
+> Пример создаваемого лог файла *`creation_log_DDMMYY.txt`*
+
+``` text
+2023-04-14 03:43:29 | Created: /home/rama/code/_git/s21_devops/linux_monitoring_v2/02/log/zzzaa_140423/aa.za_140423.azz.. | Size: 1M
+2023-04-14 03:43:29 | Created: /home/rama/code/_git/s21_devops/linux_monitoring_v2/02/log/zzzaa_140423/azzaz_140423.a.a.. | Size: 1M
+2023-04-14 03:43:29 | Created: /home/rama/code/_git/s21_devops/linux_monitoring_v2/02/log/zzzaa_140423/azzaa_140423.aaaa. | Size: 1M
+...
+...
+...
+2023-04-14 03:43:50 | Created: /home/rama/code/_git/s21_devops/linux_monitoring_v2/02/log/aazaz_140423/zazaz_140423.aa..a | Size: 1M
+2023-04-14 03:43:50 | Created: /home/rama/code/_git/s21_devops/linux_monitoring_v2/02/log/aazaz_140423/.azza_140423...zaa | Size: 1M
+2023-04-14 03:43:50 | Created: /home/rama/code/_git/s21_devops/linux_monitoring_v2/02/log/aazaz_140423/.a.a._140423.a.a.. | Size: 1M
+Start time: 2023-04-14 03:43:29
+End time: 2023-04-14 03:43:50
+Total running time: 21 seconds
+```
+
+Результаты:
+
+1. Корректная работа
+![Нормальная работа скрипта](./assets/lm_2_02_01.png)
+2. Размер создаваемого файла больше 100MB
+![Больше 100MB](./assets/lm_2_02_02.png)
+3. Количество файлов или папок указано не числом
+![Указано не числом](./assets/lm_2_02_03.png)
+4. Отсутвуют аргументы
+![Отсутвуют аргументы](./assets/lm_2_02_04.png)
 
 ## Task lists
 
 - [x] File generator
-- [ ] File system clogging
+- [x] File system clogging
 - [ ] Cleaning the file system
 - [ ] Log generator
 - [ ] Monitoring
