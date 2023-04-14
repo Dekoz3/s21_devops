@@ -13,7 +13,8 @@
 1. [Linux Monitoring v2.0](#linux-monitoring-v20) \
     1.1. [Генератор файлов](#1-генератор-файлов) \
     1.2. [Засорение файловой системы](#2-засорение-файловой-системы) \
-    1.3. [Очистка файловой системы](#3-очистка-файловой-системы)
+    1.3. [Очистка файловой системы](#3-очистка-файловой-системы) \
+    1.4. [Генератор логов](#4-генератор-логов)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -419,6 +420,7 @@ function delete_by_creation_date_and_time() {
 function delete_by_name_mask() {
     local name_mask="$1"
     
+    # find $(pwd)/../02/log -type f,d -name "${name_mask}*" 2>/dev/null | while read -r file_path; do
     find / -not \( -path /bin -prune -o -path /sbin -prune \) -type f,d -name "${name_mask}*" 2>/dev/null | while read -r file_path; do
         if [[ -e "$file_path" ]]; then
             delete_path "$file_path"
@@ -453,6 +455,7 @@ function main() {
     else
         echo "Error: Invalid cleaning method."
         echo "      Usage: $0 1, 2, or 3."
+        echo "      Cleaning method: 1 (by log file), 2 (by creation date and time), 3 (by name mask)"
         exit 1
     fi
 }
@@ -474,12 +477,80 @@ main "$@"
 ![по маске имени](./assets/lm_02_03_05.png) 
 6. Входной аргумент не соответствует возможным вариантам
 ![по маске имени](./assets/lm_02_03_06.png) 
+
+## 4. Генератор логов
+
+**== Задание ==**
+
+Написать bash-скрипт или программу на Си, генерирующий 5 файлов логов nginx в combined формате.
+
+Каждый лог должен содержать информацию за 1 день.
+
+За день должно быть сгенерировано случайное число записей от 100 до 1000.
+
+Для каждой записи должны случайным образом генерироваться:
+
+1. **IP** (любые корректные, т.е. не должно быть ip вида 999.111.777.777)
+2. **Коды ответа** (200, 201, 400, 401, 403, 404, 500, 501, 502, 503)
+3. **Методы** (GET, POST, PUT, PATCH, DELETE)
+4. **Даты** (в рамках заданного дня лога, должны идти по увеличению)
+5. **URL** запроса агента
+6. **Агенты** (Mozilla, Google Chrome, Opera, Safari, Internet Explorer, Microsoft Edge, Crawler and bot, Library and net tool)
+
+*В комментариях в вашем скрипте/программе указать, что означает каждый из использованных кодов ответа.*
+
+> `main.sh`
+``` bash
+#!/bin/bash
+
+declare -a response_codes=("200" "201" "400" "401" "403" "404" "500" "501" "502" "503")
+declare -a methods=("GET" "POST" "PUT" "PATCH" "DELETE")
+declare -a user_agents=("Mozilla" "Google Chrome" "Opera" "Safari" "Internet Explorer" "Microsoft Edge" "Crawler and bot" "Library and net tool")
+
+for i in {1..5}; do
+    log_file="nginx_log_day_${i}.log"
+    mkdir -p "log/"
+    touch "log/$log_file"
+    num_entries=$((RANDOM % 901 + 100))
+    
+    for ((j = 0; j < num_entries; j++)); do
+        ip="$(shuf -i 1-255 -n 1).$(shuf -i 1-255 -n 1).$(shuf -i 1-255 -n 1).$(shuf -i 1-255 -n 1)"
+        response_code="${response_codes[RANDOM % ${#response_codes[@]}]}"
+        method="${methods[RANDOM % ${#methods[@]}]}"
+        date="$(date -d "today -${i} days" "+%d/%b/%Y:%H:%M:%S %z")"
+        request_url="/path/to/resource"
+        user_agent="${user_agents[RANDOM % ${#user_agents[@]}]}"
+        
+        echo "$ip - - [$date] \"$method $request_url HTTP/1.1\" $response_code 0 \"-\" \"$user_agent\"" >> "log/$log_file"
+    done
+done
+```
+> Обозначение кодов 
+``` text
+# Response codes
+# 200: OK
+# 201: Created
+# 400: Bad Request
+# 401: Unauthorized
+# 403: Forbidden
+# 404: Not Found
+# 500: Internal Server Error
+# 501: Not Implemented
+# 502: Bad Gateway
+# 503: Service Unavailable
+```
+
+Результаты:
+
+1. `./main.sh`
+![](./assets/lm_02_04_01.png)
+
 ## Task lists
 
 - [x] File generator
 - [x] File system clogging
 - [x] Cleaning the file system
-- [ ] Log generator
+- [x] Log generator
 - [ ] Monitoring
 - [ ] GoAccess
 - [ ] Prometheus and Grafana
