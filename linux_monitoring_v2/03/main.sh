@@ -69,6 +69,7 @@ function delete_by_creation_date_and_time() {
 function delete_by_name_mask() {
     local name_mask="$1"
     
+    # find $(pwd)/../02/log -type f,d -name "${name_mask}*" 2>/dev/null | while read -r file_path; do
     find / -not \( -path /bin -prune -o -path /sbin -prune \) -type f,d -name "${name_mask}*" 2>/dev/null | while read -r file_path; do
         if [[ -e "$file_path" ]]; then
             delete_path "$file_path"
