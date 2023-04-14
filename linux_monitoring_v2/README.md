@@ -12,7 +12,8 @@
 
 1. [Linux Monitoring v2.0](#linux-monitoring-v20) \
     1.1. [Генератор файлов](#1-генератор-файлов) \
-    1.2. [Засорение файловой системы](#2-засорение-файловой-системы)
+    1.2. [Засорение файловой системы](#2-засорение-файловой-системы) \
+    1.3. [Очистка файловой системы](#3-очистка-файловой-системы)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -329,11 +330,155 @@ Total running time: 21 seconds
 4. Отсутвуют аргументы
 ![Отсутвуют аргументы](./assets/lm_2_02_04.png)
 
+## 3. Очистка файловой системы
+
+**== Задание ==**
+
+Написать bash-скрипт. Скрипт запускается с 1 параметром.
+Скрипт должен уметь очистить систему от созданных в *[засорение файловой системы](#2-засорение-файловой-системы)* папок и файлов 3 способами:
+
+1. По лог файлу
+2. По дате и времени создания
+3. По маске имени (т.е. символы, нижнее подчёркивание и дата).
+
+Способ очистки задается при запуске скрипта, как параметр со значением 1, 2 или 3.
+
+*При удалении по дате и времени создания, пользователем вводятся времена начала и конца с точностью до минуты. Удаляются все файлы, созданные в указанном временном промежутке. Ввод может быть реализован как через параметры, так и во время выполнения программы.*
+
+> `main.sh`
+
+```bash
+#!/bin/bash
+
+function delete_path() {
+    local file_path="$1"
+    
+    if [[ -f "$file_path" ]]; then
+        rm -f "$file_path"
+        echo "Deleted file: $file_path"
+        elif [[ -d "$file_path" ]]; then
+        rm -rf "$file_path"
+        echo "Deleted directory: $file_path"
+    fi
+}
+
+function delete_by_log_file() {
+    local log_file="$1"
+    
+    if [[ ! -f "$log_file" ]]; then
+        echo "Error: Log file not found: $log_file"
+        exit 1
+    fi
+    
+    # Declare an associative array to store the directories
+    declare -A directories
+    
+    while read -r line; do
+        local file_path=$(echo "$line" | awk -F'|' '{print $2}' | awk '{print $2}')
+        local parent_dir=$(dirname "$file_path")
+        
+        if [[ -e "$file_path" ]]; then
+            delete_path "$file_path"
+        fi
+        
+        # Add the parent directory to the associative array
+        directories["$parent_dir"]=1
+    done < "$log_file"
+    
+    # Remove the directories
+    for dir in "${!directories[@]}"; do
+        if [[ -d "$dir" ]]; then
+            delete_path "$dir"
+        fi
+    done
+    
+    rm -f "$log_file"
+}
+
+function delete_by_creation_date_and_time() {
+    local start_time="$1"
+    local end_time="$2"
+    
+    # Convert the start and end times to Unix timestamps
+    local start_timestamp=$(date -d "$start_time" +%s)
+    local end_timestamp=$(date -d "$end_time" +%s)
+    
+    # find $(pwd)/../02/log -type f -printf "%Ts|%p\n" 2>/dev/null | while read -r line; do
+    find / -not \( -path /bin -prune -o -path /sbin -prune \) -type f,d -printf "%Ts|%p\n" 2>/dev/null | while read -r line; do
+        local created_timestamp=$(echo "$line" | awk -F'|' '{print $1}')
+        local file_path=$(echo "$line" | awk -F'|' '{print $2}')
+        
+        if [[ "$created_timestamp" -gt "$start_timestamp" && "$created_timestamp" -lt "$end_timestamp" ]]; then
+            if [[ -e "$file_path" ]]; then
+                delete_path "$file_path"
+            fi
+        fi
+    done
+}
+
+function delete_by_name_mask() {
+    local name_mask="$1"
+    
+    find / -not \( -path /bin -prune -o -path /sbin -prune \) -type f,d -name "${name_mask}*" 2>/dev/null | while read -r file_path; do
+        if [[ -e "$file_path" ]]; then
+            delete_path "$file_path"
+        fi
+    done
+}
+
+function main() {
+    if [[ $# -ne 1 ]]; then
+        echo "Error: Arguments required."
+        echo "      Usage: $0 <cleaning_method>"
+        echo "      Cleaning method: 1 (by log file), 2 (by creation date and time), 3 (by name mask)"
+        exit 1
+    fi
+    
+    local cleaning_method="$1"
+    
+    if [[ $cleaning_method -eq 1 ]]; then
+        echo "Enter the log file path:"
+        read -r log_file
+        delete_by_log_file "$log_file"
+        elif [[ $cleaning_method -eq 2 ]]; then
+        echo "Enter the start date and time (format: YYYY-MM-DD HH:MM):"
+        read -r start_time
+        echo "Enter the end date and time (format: YYYY-MM-DD HH:MM):"
+        read -r end_time
+        delete_by_creation_date_and_time "$start_time" "$end_time"
+        elif [[ $cleaning_method -eq 3 ]]; then
+        echo "Enter the name mask (format: characters_date, e.g. aaazz_021121):"
+        read -r name_mask
+        delete_by_name_mask "$name_mask"
+    else
+        echo "Error: Invalid cleaning method."
+        echo "      Usage: $0 1, 2, or 3."
+        exit 1
+    fi
+}
+
+main "$@"
+```
+
+Результаты:
+
+1. По лог файлу `main.sh 1` 
+![по лог файлу](./assets/lm_02_03_01.png)
+2. Ошибка отсутвует лог файл
+![ошибка отсутвует лог файл](./assets/lm_02_03_02.png)
+3. По дате и времени создания `main.sh 2` 
+![по дате и времени создания](./assets/lm_02_03_03.png)
+4. По маске имени (т.е. символы, нижнее подчёркивание и дата) `main.sh 3`
+![по маске имени](./assets/lm_02_03_04.png) 
+5. Отсутвуют аргументы
+![по маске имени](./assets/lm_02_03_05.png) 
+6. Входной аргумент не соответствует возможным вариантам
+![по маске имени](./assets/lm_02_03_06.png) 
 ## Task lists
 
 - [x] File generator
 - [x] File system clogging
-- [ ] Cleaning the file system
+- [x] Cleaning the file system
 - [ ] Log generator
 - [ ] Monitoring
 - [ ] GoAccess
