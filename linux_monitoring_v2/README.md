@@ -15,7 +15,8 @@
     1.2. [Засорение файловой системы](#2-засорение-файловой-системы) \
     1.3. [Очистка файловой системы](#3-очистка-файловой-системы) \
     1.4. [Генератор логов](#4-генератор-логов) \
-    1.5. [Мониторинг](#5-мониторинг)
+    1.5. [Мониторинг](#5-мониторинг) \
+    1.6. [GoAccess](#6-goaccess)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -622,6 +623,36 @@ esac
 ![Ошибка: пустое значение](./assets/lm_02_05_05.png)
 6. Ошибка: недопустимый вариант действия
 ![Ошибка: недопустимый вариант действия](./assets/lm_02_05_06.png)
+
+## 6. GoAccess
+
+**== Задание ==**
+
+С помощью утилиты `GoAccess` получить ту же информацию, что и в [мониторинг](#5-мониторинг) 
+
+Открыть веб интерфейс утилиты на локальной машине.
+
+> `main.sh`
+``` bash
+#!/bin/bash
+
+if [ $# != 0 ]
+then
+    echo "Error: Invalid number of arguments (should be 0)"
+else
+    goaccess $(pwd)/../04/log/*.log --log-format=COMBINED -o report.html
+    xdg-open report.html
+fi
+```
+
+Результат:
+
+1. Терминал
+![Терминал](./assets/lm_02_06_01.png)
+2. Браузер
+![Браузер](./assets/lm_02_06_02.png)
+
+
 ## Task lists
 
 - [x] File generator
@@ -629,7 +660,7 @@ esac
 - [x] Cleaning the file system
 - [x] Log generator
 - [x] Monitoring
-- [ ] GoAccess
+- [x] GoAccess
 - [ ] Prometheus and Grafana
 - [ ] A ready-made dashboard
 - [ ] Bonus. Your own node_exporter
