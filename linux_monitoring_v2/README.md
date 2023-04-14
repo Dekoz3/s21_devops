@@ -14,7 +14,8 @@
     1.1. [Генератор файлов](#1-генератор-файлов) \
     1.2. [Засорение файловой системы](#2-засорение-файловой-системы) \
     1.3. [Очистка файловой системы](#3-очистка-файловой-системы) \
-    1.4. [Генератор логов](#4-генератор-логов)
+    1.4. [Генератор логов](#4-генератор-логов) \
+    1.5. [Мониторинг](#5-мониторинг)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -543,15 +544,91 @@ done
 Результаты:
 
 1. `./main.sh`
-![](./assets/lm_02_04_01.png)
+![результат создания логов](./assets/lm_02_04_01.png)
 
+
+## 5. Мониторинг
+
+**== Задание ==**
+Написать bash-скрипт для разбора логов nginx из [генератор логов](#4-генератор-логов) через `awk`.
+
+Скрипт запускается с 1 параметром, который принимает значение 1, 2, 3 или 4.
+
+В зависимости от значения параметра вывести:
+
+1. Все записи, отсортированные по коду ответа
+2. Все уникальные IP, встречающиеся в записях
+3. Все запросы с ошибками (код ответа - 4хх или 5хх)
+4. Все уникальные IP, которые встречаются среди ошибочных запросов
+
+> `main.sh`
+
+``` bash 
+#!/bin/bash
+
+log_file="$(pwd)/../04/log/nginx_log_day_3.log"
+
+function sort_by_response_code() {
+    awk '{print $9, $0}' "$log_file" | sort -n | cut -d ' ' -f2-
+}
+
+function unique_ips() {
+    awk '{print $1}' "$log_file" | sort -u
+}
+
+function error_requests() {
+    awk '($9 >= 400 && $9 < 600) {print}' "$log_file"
+}
+
+function unique_ips_with_errors() {
+    awk '($9 >= 400 && $9 < 600) {print $1}' "$log_file" | sort -u
+}
+
+if [[ $# -ne 1 ]]; then
+    echo "Usage: $0 <option>"
+    echo "Options:"
+    echo "        1 - All entries sorted by response code"
+    echo "        2 - All unique IPs found in the entries"
+    echo "        3 - All requests with errors (response code - 4xx or 5xx)"
+    echo "        4 - All unique IPs found among the erroneous requests"
+    exit 1
+fi
+
+option="$1"
+
+case "$option" in
+    1) sort_by_response_code ;;
+    2) unique_ips ;;
+    3) error_requests ;;
+    4) unique_ips_with_errors ;;
+    *)
+        echo "Error: Invalid option. Choose 1, 2, 3, or 4."
+        exit 1
+    ;;
+esac
+```
+
+Результаты:
+
+1. Все записи, отсортированные по коду ответа
+![Все записи, отсортированные по коду ответа](./assets/lm_02_05_01.png)
+2. Все уникальные IP, встречающиеся в записях
+![Все уникальные IP, встречающиеся в записях](./assets/lm_02_05_02.png)
+3. Все запросы с ошибками (код ответа - 4хх или 5хх)
+![Все запросы с ошибками (код ответа - 4хх или 5хх)](./assets/lm_02_05_03.png) 
+4. Все уникальные IP, которые встречаются среди ошибочных запросов
+![Все уникальные IP, которые встречаются среди ошибочных запросов](./assets/lm_02_05_04.png)
+5. Ошибка: пустое значение
+![Ошибка: пустое значение](./assets/lm_02_05_05.png)
+6. Ошибка: недопустимый вариант действия
+![Ошибка: недопустимый вариант действия](./assets/lm_02_05_06.png)
 ## Task lists
 
 - [x] File generator
 - [x] File system clogging
 - [x] Cleaning the file system
 - [x] Log generator
-- [ ] Monitoring
+- [x] Monitoring
 - [ ] GoAccess
 - [ ] Prometheus and Grafana
 - [ ] A ready-made dashboard
