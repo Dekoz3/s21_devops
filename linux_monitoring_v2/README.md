@@ -16,7 +16,8 @@
     1.3. [Очистка файловой системы](#3-очистка-файловой-системы) \
     1.4. [Генератор логов](#4-генератор-логов) \
     1.5. [Мониторинг](#5-мониторинг) \
-    1.6. [GoAccess](#6-goaccess)
+    1.6. [GoAccess](#6-goaccess) \
+    1.7. [Prometheus и Grafana](#7-prometheus-и-grafana)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -667,13 +668,12 @@ fi
 ``` bash
 #!/bin/bash
 
-#install prometheus
-
+#install Prometheus
 #a. Download the latest Prometheus release:
 wget https://github.com/prometheus/prometheus/releases/download/v2.32.0/prometheus-2.32.0.linux-amd64.tar.gz
 #b. Extract the archive:
 tar xvfz prometheus-*.tar.gz
-cd prometheus-2.*
+cd prometheus-2.32.0.linux-amd64/
 #c. Move the Prometheus binary files to /usr/local/bin:
 sudo mv prometheus promtool /usr/local/bin/
 #d. Create the Prometheus configuration directory and copy the configuration file:
@@ -714,6 +714,8 @@ sudo systemctl daemon-reload
 sudo systemctl start prometheus
 sudo systemctl enable prometheus
 
+
+#install Node Exporter
 # To download and set up Node Exporter, follow these steps:
 sudo useradd --system --no-create-home --shell /bin/false node_exporter
 wget https://github.com/prometheus/node_exporter/releases/download/v1.3.1/node_exporter-1.3.1.linux-amd64.tar.gz
@@ -721,9 +723,8 @@ tar -xzf node_exporter-1.3.1.linux-amd64.tar.gz
 cd node_exporter-1.3.1.linux-amd64
 sudo mv node_exporter-1.3.1.linux-amd64/node_exporter /usr/local/bin/
 
-
 #node_exporter.service:
-# sudo vim /etc/systemd/system/node_exporter.service
+sudo vim /etc/systemd/system/node_exporter.service
 #Add the following content to the file:
 cat <<EOF >/etc/systemd/system/node_exporter.service
 [Unit]
@@ -745,6 +746,7 @@ ExecStart=/usr/local/bin/node_exporter \
 
 [Install]
 WantedBy=multi-user.target
+EOF
 
 #Start Node Exporter
 sudo systemctl enable node_exporter
@@ -754,13 +756,14 @@ sudo systemctl status node_exporter
 #Create a static target for Node Exporter:
 sudo vim /etc/prometheus/prometheus.yml
 #Add this at the end of file:
-- job_name: "node_export"
-static_configs:
-- targets: ["localhost:9100"]
+cat <<EOF >vim /etc/prometheus/prometheus.yml
+    - job_name: "node_export"
+        static_configs:
+          - targets: ["localhost:9100"]
 EOF
 
 
-#install grafana
+#install Grafana
 sudo apt-get install -y apt-transport-https
 sudo apt-get install -y software-properties-common wget
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
@@ -806,13 +809,15 @@ ssh -L 9090:localhost:9090 -L 3000:localhost:3000 user@your_VM_IP
 *Посмотреть на нагрузку жесткого диска, оперативной памяти и ЦПУ*
 
 1. Панель `Prometheus`
-![]()
-1. Панель `Grafana`
-![]()
-1. Нагрузка на жесткий диск после запуска скрипта
-![]()
-1. Нагрузка после `stress -c 2 -i 1 -m 1 --vm-bytes 32M -t 10s`
-![]()
+![Prometheus](./07/Prometheus.png)
+2. Панель `Grafana`
+![Grafana](./07/Grafana.png)
+3. Нагрузка на жесткий диск после запуска скрипта из `Task #2`
+![Task #2](./07/Task2.png)
+4. Запуск
+![Запуск](./07/Stress.png)
+5. Нагрузка после `stress -c 2 -i 1 -m 1 --vm-bytes 128M -t 20s`
+![Нагрузка](./07/Stress_grafana.png)
 
 ## Task lists
 
@@ -822,6 +827,6 @@ ssh -L 9090:localhost:9090 -L 3000:localhost:3000 user@your_VM_IP
 - [x] Log generator
 - [x] Monitoring
 - [x] GoAccess
-- [ ] Prometheus and Grafana
+- [x] Prometheus and Grafana
 - [ ] A ready-made dashboard
 - [ ] Bonus. Your own node_exporter
