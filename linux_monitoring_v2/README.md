@@ -17,7 +17,8 @@
     1.4. [Генератор логов](#4-генератор-логов) \
     1.5. [Мониторинг](#5-мониторинг) \
     1.6. [GoAccess](#6-goaccess) \
-    1.7. [Prometheus и Grafana](#7-prometheus-и-grafana)
+    1.7. [Prometheus и Grafana](#7-prometheus-и-grafana) \
+    1.8. [Готовый дашборд](#8-готовый-дашборд)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -819,6 +820,30 @@ ssh -L 9090:localhost:9090 -L 3000:localhost:3000 user@your_VM_IP
 5. Нагрузка после `stress -c 2 -i 1 -m 1 --vm-bytes 128M -t 20s`
 ![Нагрузка](./07/Stress_grafana.png)
 
+## 8. Готовый дашборд
+
+**== Задание ==**
+
+Установить готовый дашборд `Node Exporter Quickstart and Dashboard` с официального сайта `Grafana Labs`
+
+1. Готовый дашборд
+![Quickstart](./08/Quickstart.png)
+
+Проводим те же тесты, что и в [Prometheus и Grafana](#7-prometheus-и-grafana)
+
+2. Нагрузка на сервер после выполенения [засорение файловой системы](#2-засорение-файловой-системы) 
+![Task 2](./08/Task2.png)
+
+3. Нагрузка после стрес теста `stress -c 2 -i 1 -m 1 --vm-bytes 128M -t 20s`
+![Stress](./08/Stress.png)
+
+Запускаем ещё одну виртуальную машину, находящуюся в одной сети с текущей
+
+Запускаем тест нагрузки сети с помощью утилиты `iperf3`
+
+4. Смотрим на нагрузку сетевого интерфейса
+![]()
+
 ## Task lists
 
 - [x] File generator
@@ -828,5 +853,5 @@ ssh -L 9090:localhost:9090 -L 3000:localhost:3000 user@your_VM_IP
 - [x] Monitoring
 - [x] GoAccess
 - [x] Prometheus and Grafana
-- [ ] A ready-made dashboard
+- [x] A ready-made dashboard
 - [ ] Bonus. Your own node_exporter
