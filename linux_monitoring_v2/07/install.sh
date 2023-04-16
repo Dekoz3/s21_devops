@@ -88,7 +88,7 @@ sudo systemctl status node_exporter
 #Create a static target for Node Exporter:
 sudo vim /etc/prometheus/prometheus.yml
 #Add this at the end of file:
-cat <<EOF >
+cat <<EOF >/etc/prometheus/prometheus.yml
     - job_name: "node_export"
         static_configs:
           - targets: ["localhost:9100"]
