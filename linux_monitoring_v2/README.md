@@ -18,7 +18,8 @@
     1.5. [Мониторинг](#5-мониторинг) \
     1.6. [GoAccess](#6-goaccess) \
     1.7. [Prometheus и Grafana](#7-prometheus-и-grafana) \
-    1.8. [Готовый дашборд](#8-готовый-дашборд)
+    1.8. [Готовый дашборд](#8-готовый-дашборд) \
+    1.9. [Дополнительно. Свой node_exporter](#9-дополнительно-свой-node_exporter)
 2. [Task lists](#task-lists)
 
 ## 1. Генератор файлов
@@ -850,6 +851,114 @@ ssh -L 9090:localhost:9090 -L 3000:localhost:3000 user@your_VM_IP
 7. Получение пакеков
 ![Получение пакеков](./08/down.png)
 
+
+## 9. Дополнительно. Свой node_exporter
+
+**== Задание ==**
+
+Написать bash-скрипт или программу на Си, которая собирает информацию по базовым метрикам системы (ЦПУ, оперативная память, жесткий диск (объем)).
+
+Скрипт или программа должна формировать `html страничку` по формату `Prometheus`, которую будет отдавать `nginx`. 
+
+Саму страничку обновлять можно как внутри bash-скрипта или программы (в цикле), так и при помощи утилиты `cron`, но не чаще, чем раз в 3 секунды.
+
+Поменять конфигурационный файл `Prometheus`, чтобы он собирал информацию с созданной вами странички.
+
+Провести те же тесты, что и в [Prometheus и Grafana](#7-prometheus-и-grafana)
+
+1. Добавляем новый target в `prometheus.yml`
+``` yml
+...
+  - job_name: "system_metrics"
+    static_configs:
+      - targets: ["localhost:8080"]
+```
+![prometheus](./09/Prometheus.png)
+2. Настройки в `nginx`
+```bash
+$ sudo vim /etc/nginx/sites-available/metrics
+```
+``` yml
+server {
+        listen 8080;
+        server_name localhost;
+
+        location /metrics {
+                alias /var/www/html/metrics.html;
+                default_type text/html;
+        }
+}
+```
+``` bash
+$ sudo vim /etc/nginx/sites-available/metrics
+$ sudo ln -s /etc/nginx/sites-available/metrics /etc/nginx/sites-enabled/metrics
+$ sudo vim /etc/nginx/nginx.conf
+```
+Заменить `include /etc/nginx/sites-enabled/*;` на:
+``` bash
+...
+    include /etc/nginx/sites-enabled/metrics;
+...
+```
+3. Запускаем сервисы
+``` bash
+$ sudo nginx -t
+$ sudo systemctl start nginx.service
+$ sudo systemctl start prometheus.service
+```
+4. Скрипт который отслеживает нагрузку
+``` bash
+#!/bin/bash
+
+while true; do
+    # Collect system metrics
+    cpu_usage=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
+    total_memory=$(free -m | awk 'NR==2{print $2}')
+    used_memory=$(free -m | awk 'NR==2{print $3}')
+    disk_usage=$(df -h / | awk 'NR==2{print $5}' | tr -d '%')
+    
+    # Create an HTML page in Prometheus format
+    cat << EOF > /var/www/html/metrics.html
+# HELP cpu_usage CPU usage percentage
+# TYPE cpu_usage gauge
+cpu_usage $cpu_usage
+# HELP total_memory Total memory in megabytes
+# TYPE total_memory gauge
+total_memory $total_memory
+# HELP used_memory Used memory in megabytes
+# TYPE used_memory gauge
+used_memory $used_memory
+# HELP disk_usage Disk usage percentage
+# TYPE disk_usage gauge
+disk_usage $disk_usage
+EOF
+    
+    # Wait for 3 seconds before updating the metrics again
+    sleep 3
+done
+```
+> `prometheus` очень чувствителен к таблуяции, он не умеет обрабатывать HTML теги, только с text.
+5. Вывод скрипта `main.sh`
+![HTML](./09/Html.png)
+
+``` bash 
+$ curl http://localhost:8080/metrics
+```
+6. Запуск скрипт в фоне
+``` bash 
+$ sudo bash main.sh &
+```
+7. Запускаем скрипт из task #2
+``` bash
+$ sudo bash main.sh az az.az 50
+```
+![task #2](./09/Task2.png)
+8. Стресс тест
+``` bash 
+$ stress -c 1 -i 1 -m 1 --vm-bytes 1024M -t 30s
+```
+![task #2](./09/Stress.png)
+
 ## Task lists
 
 - [x] File generator
@@ -860,4 +969,4 @@ ssh -L 9090:localhost:9090 -L 3000:localhost:3000 user@your_VM_IP
 - [x] GoAccess
 - [x] Prometheus and Grafana
 - [x] A ready-made dashboard
-- [ ] Bonus. Your own node_exporter
+- [x] Bonus. Your own node_exporter
