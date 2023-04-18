@@ -55,7 +55,7 @@ function create_folders_and_files() {
             local file_path="${folder_path}/${file_name}.${file_ext}"
             
             # truncate -s "${file_size_kb}K" "$file_path"
-            fallocate -l "${file_size_mb}K" "$file_path"
+            fallocate -l "${file_size_kb}K" "$file_path"
             echo "$(date '+%Y-%m-%d %H:%M:%S') | Created: ${file_path} | Size: ${file_size_kb}K" >> "$log_file"
         done
     done
