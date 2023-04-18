@@ -959,6 +959,8 @@ $ stress -c 1 -i 1 -m 1 --vm-bytes 1024M -t 30s
 ```
 ![task #2](./09/Stress.png)
 
+9. Вывод в `prometheus`
+![task #2](./09/Prometheus_used.png)
 ## Task lists
 
 - [x] File generator
